@@ -2,7 +2,7 @@
 Task Tree is a CLI tool that helps you keep track of your tasks in a tree structure
 
 ### Running
-Gemming still has to be done. For the moment cloning and doing a bundle install will get install.
+Gemming still has to be done. For the moment cloning and doing a bundle install will install what is needed.
 Then executing `ruby task-tree.rb --help` will get you the rest of the way.
 
 ### Disclaimer
