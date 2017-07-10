@@ -2,7 +2,7 @@
 source "https://rubygems.org"
 
 gem 'tty'
-gem 'figlet'
+gem 'commander'
 gem 'byebug'
 gem 'rubytree'
 
