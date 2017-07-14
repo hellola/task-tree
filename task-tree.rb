@@ -120,7 +120,7 @@ class Tasky
 
   def set_as_complete
     @current_node.content = 'complete'
-    @current_node = @current_node.parent
+    move_next
   end
 
   def move_up
@@ -129,26 +129,31 @@ class Tasky
 
   def move_down
     @current_node = @current_node.first_child unless @current_node.first_child.nil?
+    if @current_node.content == 'complete'
+      move_up unless move_next || move_previous
+    end
   end
 
   def move_previous(prev=@current_node)
-    return if prev.is_only_child? || prev.is_first_sibling?
+    return false if prev.is_only_child? || prev.is_first_sibling?
     prev = prev.previous_sibling
     if prev.content == 'complete'
       prev = move_previous(prev)
     else
       @current_node = prev
     end
+    true
   end
 
   def move_next(nxt=@current_node)
-    return if nxt.is_only_child? || nxt.is_last_sibling?
+    return false if nxt.is_only_child? || nxt.is_last_sibling?
     nxt = nxt.next_sibling
     if nxt.content == 'complete'
       nxt = move_next(nxt)
     else
       @current_node = nxt
     end
+    true
   end
 
   def prompt_and_add_task
