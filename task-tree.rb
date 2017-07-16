@@ -69,27 +69,27 @@ class Tasky
       @prompt.keypress('_')
     when :add
       prompt_and_add_task
-      print_current
+      print_current(action)
       save_state
     when :up
       move_up
-      print_current
+      print_current(action)
     when :down
       move_down
-      print_current
+      print_current(action)
     when :print
       print_tree
-      print_current
+      print_current(action)
     when :complete
       set_as_complete
-      print_current
+      print_current(action)
       save_state
     when :previous
       move_previous
-      print_current
+      print_current(action)
     when :next
       move_next
-      print_current
+      print_current(action)
     when :pommo
       start_pommo
     end
@@ -164,14 +164,111 @@ class Tasky
     @current_node = new_node
   end
 
-  def print_current
-    draw_task(@current_node.content)
+  def print_current(direction=nil)
+    empty_row = ""
+    @previous_page = @screen.height.times.map { empty_row } if @previous_page.nil?
+    page = @previous_page
+    task = draw_task(@current_node.content)
+    task_lines = task.split("\n")
+    case direction
+    when :down
+      blank = 0
+      @screen.height.times do |line_num|
+        start_task = @screen.height - task_lines.length
+        line = line_num >= start_task ? task_lines[line_num - start_task] : empty_row
+        blank +=1 if line == empty_row
+        puts page
+        sleep 0.01
+        # add after
+        page.push(line)
+        # remove first
+        page = page[1..-1]
+      end
+    when :up
+      task_lines.reverse!
+      @screen.height.times do |line_num|
+        line = task_lines.length > line_num ? task_lines[line_num] :  empty_row
+        puts page
+        sleep 0.01
+        # add before
+        page.unshift(line)
+        # remove last
+        page = page[0..-2]
+      end
+    when :next
+      blank_lines = (@screen.height-task_lines.length).times.map { empty_row }
+      right_page = blank_lines + task_lines
+      joined = join_page(page, right_page)
+      ((@screen.width * 0.8).to_i).times do |col_num|
+        joined = remove_page_col(joined)
+        print_from_left(joined)
+        # TODO: need to regulate speed here, moving previous is very slow
+        sleep 0.005
+      end
+      page = right_page
+    when :previous
+      blank_lines = (@screen.height-task_lines.length).times.map { empty_row }
+      left_page = blank_lines + task_lines
+      joined = join_page(left_page, page)
+      ((@screen.width * 0.666).to_i).times do |col_num|
+        joined = remove_page_col(joined, reverse: true)
+        print_from_right(joined)
+        sleep 0.003
+      end
+      page = left_page
+      puts page
+    else
+      task = draw_task(@current_node.content)
+      task_lines = task.split("\n")
+      blank_lines = (@screen.height-task_lines.length).times.map { empty_row }
+      page = blank_lines + task_lines
+      puts task
+    end
+    @previous_page = page
+  end
+
+  def join_page(left, right)
+    return nil if left.length != right.length
+    joined = []
+    left.length.times do |i|
+      joined.push(left[i] + right[i]) unless left.empty?
+    end
+    joined
+  end
+
+  def print_from_left(page)
+    to_print = []
+    end_num = @screen.width-1
+    page.each { |line| to_print.push(line[0..end_num]) }
+    puts to_print
+  end
+
+  def print_from_right(page)
+    to_print = []
+    page.each { |line| to_print.push(line[-@screen.width..-1]) }
+    puts to_print
+  end
+
+  def remove_page_col(page, options={})
+    new_page = []
+    page.each do |line|
+      if line.empty?
+        new_page.push(line)
+      else
+        if options[:reverse]
+          new_page.push(line[0..-2])
+        else
+          new_page.push(line[1..-1])
+        end
+      end
+    end
+    new_page
   end
 
   def draw_task(task)
-    width = @screen.width
+    width = @screen.width - 2
     text = `figlet -f #{@font_path} -c -w #{width} #{task}`
-    puts text
+    text
   end
 
   def save_state
