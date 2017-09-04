@@ -18,6 +18,7 @@ command :start do |c|
   c.description = ''
   c.example 'start --output=file.json', 'run tasky with a custom output / store file'
   c.option '--output=<output>', 'Set a custom output file'
+  c.option '--animations', 'Set a custom output file'
   c.option '--figlet-font=<figlet_font>', 'Path to figlet font to use'
   c.action do |args, options|
     # Do something or c.when_called Tasky-trackery::Commands::Start
@@ -35,6 +36,7 @@ class Tasky
     @tree_root = Tree::TreeNode.new('__', '__')
     @current_node = @tree_root
     @screen = TTY::Screen.new
+    @animations = options.animations || false
   end
 
   def start
@@ -55,6 +57,8 @@ class Tasky
         q.choice key: 'x', name: 'quit without saving', value: :exit
         q.choice key: 's', name: 'start pommodoro timer', value: :pommo
         q.choice key: 'l', name: 'clean display', value: :clean
+        q.choice key: '$', name: 'last', value: :last_sibling
+        q.choice key: '_', name: 'first', value: :first_sibling
       end
       handle_action(action)
       break if action == :quit || action == :exit
@@ -90,6 +94,13 @@ class Tasky
     when :next
       move_next
       print_current(action)
+    when :last_sibling
+      move_last
+      print_current
+    when :first_sibling
+      move_first
+      print_current
+    when :pommo
     when :pommo
       start_pommo
     end
@@ -156,6 +167,25 @@ class Tasky
     true
   end
 
+  def move_last(current=@current_node)
+    last = current.last_sibling
+    if last.content == 'complete'
+      last = move_previous(last)
+    else
+      @current_node = last
+    end
+  end
+
+
+  def move_first(current=@current_node)
+    first = current.first_sibling
+    if first.content == 'complete'
+      first = move_next(first)
+    else
+      @current_node = first
+    end
+  end
+
   def prompt_and_add_task
     new_task = @prompt.ask('what to add?')
     return if new_task.nil? || new_task.empty?
@@ -165,6 +195,9 @@ class Tasky
   end
 
   def print_current(direction=nil)
+    if !@animations
+      direction = nil
+    end
     empty_row = ""
     @previous_page = @screen.height.times.map { empty_row } if @previous_page.nil?
     page = @previous_page
@@ -199,8 +232,9 @@ class Tasky
       blank_lines = (@screen.height-task_lines.length).times.map { empty_row }
       right_page = blank_lines + task_lines
       joined = join_page(page, right_page)
-      ((@screen.width * 0.8).to_i).times do |col_num|
-        joined = remove_page_col(joined)
+      speed = 3
+      ((@screen.width * 0.8).to_i / speed).times do |col_num|
+        joined = remove_page_col(joined, speed: speed)
         print_from_left(joined)
         # TODO: need to regulate speed here, moving previous is very slow
         sleep 0.005
@@ -210,8 +244,9 @@ class Tasky
       blank_lines = (@screen.height-task_lines.length).times.map { empty_row }
       left_page = blank_lines + task_lines
       joined = join_page(left_page, page)
-      ((@screen.width * 0.666).to_i).times do |col_num|
-        joined = remove_page_col(joined, reverse: true)
+      speed = 3
+      ((@screen.width * 0.666).to_i / speed).times do |col_num|
+        joined = remove_page_col(joined, reverse: true, speed: speed)
         print_from_right(joined)
         sleep 0.003
       end
@@ -251,14 +286,15 @@ class Tasky
 
   def remove_page_col(page, options={})
     new_page = []
+    speed = options[:speed] || 1
     page.each do |line|
       if line.empty?
         new_page.push(line)
       else
         if options[:reverse]
-          new_page.push(line[0..-2])
+          new_page.push(line[0..-speed])
         else
-          new_page.push(line[1..-1])
+          new_page.push(line[speed..-1])
         end
       end
     end
