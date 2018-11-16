@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'commander/import'
+require 'tasktree/tasky'
+
+program :name, 'task-tree'
+program :version, '0.0.1'
+program :description, 'Lets you keep track of what your doing and your stack, allowing you to traverse back when tasks are complete'
+
+command :start do |c|
+  c.syntax = 'task-tree start [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'start --output=file.json', 'run tasky with a custom output / store file'
+  c.option '--output=<output>', 'Set a custom output file'
+  c.option '--animations', 'Set a custom output file'
+  c.option '--figlet-font=<figlet_font>', 'Path to figlet font to use'
+  c.action do |args, options|
+    t = TaskTree::Tasky.new(options)
+    t.start
+  end
+end
