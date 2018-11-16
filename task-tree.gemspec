@@ -1,11 +1,11 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "task/tree/version"
+require "tasktree/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "task-tree"
-  spec.version       = Task::Tree::VERSION
+  spec.version       = TaskTree::VERSION
   spec.authors       = ["Ewoudt Kellerman"]
   spec.email         = ["ewoudt.kellerman@gmail.com"]
 
