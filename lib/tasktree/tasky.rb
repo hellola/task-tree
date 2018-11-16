@@ -9,7 +9,8 @@ module TaskTree
   class Tasky
     def initialize(options)
       @output = options.output || 'default.json'
-      @font_path = options.figlet_font || './fonts/larry3d'
+      gem_base_dir = Gem.loaded_specs["task-tree"].full_gem_path
+      @font_path = options.figlet_font || "#{gem_base_dir}/fonts/larry3d"
       @prompt = TTY::Prompt.new
       @tree_root = Tree::TreeNode.new('__', '__')
       @current_node = @tree_root
