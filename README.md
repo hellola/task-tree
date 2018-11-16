@@ -7,7 +7,8 @@ Don't be too surprised if things go wrong!
 
 ## Dependencies
 - Figlet
-- Figlet fonts, there are many fonts readily available for figlet, have a look around. The default is larry3d.
+- Figlet fonts, there are many fonts readily available for figlet the best place is probably [figlet.org](http://www.figlet.org/fontdb.cgi) 
+- The default is larry3d.
 
 ## Installation
 
