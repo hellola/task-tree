@@ -6,6 +6,7 @@ require 'tasktree/tasky'
 program :name, 'task-tree'
 program :version, '0.0.1'
 program :description, 'Lets you keep track of what your doing and your stack, allowing you to traverse back when tasks are complete'
+default_command :start
 
 command :start do |c|
   c.syntax = 'task-tree start [options]'
