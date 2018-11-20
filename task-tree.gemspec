@@ -21,8 +21,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "bundler", "~> 1.16"
   spec.add_dependency "rake", "~> 10.0"
-  spec.add_dependency "tty"
+  spec.add_dependency "tty-prompt"
   spec.add_dependency "tty-screen"
+  spec.add_dependency "tty-progressbar"
   spec.add_dependency "rubytree"
   spec.add_dependency "commander"
   spec.add_development_dependency "byebug"
